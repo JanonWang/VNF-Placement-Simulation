@@ -284,10 +284,10 @@ public class VNFPSimulation {
             double para1 = 1;
             double para2 = 0;
             double para3;
-//            for(int i = 0; i <= 20; i++) {
-//                para3 = (double) i / 10;
-//                VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
-//            }
+            for(int i = 0; i <= 20; i++) {
+            para3 = (double) i / 10;
+            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+        }
             para1 = 1;
             para2 = 0;
             para3 = 1;
