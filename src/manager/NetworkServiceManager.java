@@ -3,9 +3,7 @@ package manager;
 import model.NetworkService;
 import model.VirtualNetworkFunction;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Janon Wang
@@ -16,6 +14,7 @@ public class NetworkServiceManager {
     private double trafficRateMin; // Mbps
     private int vnfSum; // the number of the the vnf type
     private double vnfRelationPara;
+    private Map<Integer, Integer> vnfMapping;
 //    private double[][] vnfRelation;
 
     /**
@@ -28,6 +27,27 @@ public class NetworkServiceManager {
         this.trafficRateMin = trafficRateMin;
         this.vnfSum = vnfSum;
         this.vnfRelationPara = vnfRelationPara;
+        this.vnfMapping = new HashMap<>();
+        // 3-->7-->9-->12
+        // 2-->6-->8-->4-->10
+        // 1-->5-->17-->16
+        // 11-->13-->14
+        // 15, 18, 19, 20
+        this.vnfMapping.put(3,7);
+        this.vnfMapping.put(7,9);
+        this.vnfMapping.put(9,12);
+
+        this.vnfMapping.put(2,6);
+        this.vnfMapping.put(6,8);
+        this.vnfMapping.put(8,4);
+        this.vnfMapping.put(4,10);
+
+        this.vnfMapping.put(1,5);
+        this.vnfMapping.put(5,17);
+        this.vnfMapping.put(17,16);
+
+        this.vnfMapping.put(11,13);
+        this.vnfMapping.put(13,14);
     }
 
     public NetworkService nextNS() {
@@ -66,7 +86,7 @@ public class NetworkServiceManager {
     private LinkedList<VirtualNetworkFunction> generateVnfList(int sfcLength, int trafficRate) {
         LinkedList<VirtualNetworkFunction> vnfList = new LinkedList<>();
         List<Integer> vnfUnChoosed = new ArrayList<>(vnfSum);
-        // 初始化vnfUnchoosed集合
+        // 初始化vnfUnChoosed集合
         for(int i = 0; i < vnfSum; i++) {
             vnfUnChoosed.add(i + 1);
         }
@@ -84,30 +104,26 @@ public class NetworkServiceManager {
         return vnfList;
     }
 
+    // 3-->7-->9-->12
+    // 2-->6-->8-->4-->10
+    // 1-->5-->17-->16
+    // 11-->13-->14
+    // 15, 18, 19, 20
     private int nextVNF(List<Integer> vnfUnChoosedList, int lastVnfType) {
-        // 如果上一跳为vnf最后一种vnf
-        if (lastVnfType == vnfSum) {
-            int random = randomUniformInt(0, vnfUnChoosedList.size() - 1);
-            return vnfUnChoosedList.get(random);
-        } else {
-            // 如果随机到取lastVnfType + 1
-            if(Math.random() < vnfRelationPara) {
-                // 如果lastVnfType没有被选过
-                if (vnfUnChoosedList.contains(lastVnfType + 1)){
-                    return lastVnfType + 1;
+        double random = Math.random();
+        if(vnfMapping.containsKey(lastVnfType)) {
+            int nextVnfType = vnfMapping.get(lastVnfType);
+            if(vnfUnChoosedList.contains(nextVnfType)) {
+                if(random < vnfRelationPara){
+                    return nextVnfType;
                 } else {
-                    int random = randomUniformInt(0, vnfUnChoosedList.size() - 1);
-                    return vnfUnChoosedList.get(random);
+                    return vnfUnChoosedList.get(randomUniformInt(0, vnfUnChoosedList.size() - 1));
                 }
             } else {
-                int vnfTypeTmp;
-                // 在除了lastVnfType + 1 中随机取一种
-                do {
-                    int random = randomUniformInt(0, vnfUnChoosedList.size() - 1);
-                    vnfTypeTmp = vnfUnChoosedList.get(random);
-                } while (vnfTypeTmp == lastVnfType + 1);
-                return vnfTypeTmp;
+                return vnfUnChoosedList.get(randomUniformInt(0, vnfUnChoosedList.size() - 1));
             }
+        } else {
+            return vnfUnChoosedList.get(randomUniformInt(0, vnfUnChoosedList.size() - 1));
         }
     }
 
@@ -123,7 +139,7 @@ public class NetworkServiceManager {
 
     public static void main(String[] args) {
         // 关系系数取0.3时，已经有了很好的关联性
-        NetworkServiceManager networkServiceManager = new NetworkServiceManager(20, 0.5, 2.1, 10);
+        NetworkServiceManager networkServiceManager = new NetworkServiceManager(20, 0.8, 2.1, 10);
         NetworkService networkService = networkServiceManager.nextNS();
         System.out.print("the length of the ns is:" + networkService.sfcLength + "\n");
         System.out.print("the traffic rate of the ns is:" + networkService.trafficRate + "\n");

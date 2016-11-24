@@ -274,7 +274,8 @@ public class VNFPSimulation {
                 vnfpSimulation.acceptedNS.add(ns);
         }
         System.out.print("-----打印数据-----\n\n\n");
-        vnfpSimulation.showSimulationResult2(para1, para2, para3, vnfRelationPara);
+        //vnfpSimulation.showSimulationResult2(para1, para2, para3, vnfRelationPara);\
+        vnfpSimulation.showSimulationResult1(para1, para2, para3);
     }
 
 
@@ -284,10 +285,10 @@ public class VNFPSimulation {
             double para1 = 1;
             double para2 = 0;
             double para3;
-            for(int i = 0; i <= 20; i++) {
-            para3 = (double) i / 10;
-            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
-        }
+//            for(int i = 0; i <= 20; i++) {
+//            para3 = (double) i / 10;
+//            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+//        }
             para1 = 1;
             para2 = 0;
             para3 = 1;
