@@ -282,8 +282,6 @@ public class VNFPSimulation {
     }
 
 
-
-
     public static void main(String[] args) {
 
         double vnfRelationPara = (double)3 / 10;
