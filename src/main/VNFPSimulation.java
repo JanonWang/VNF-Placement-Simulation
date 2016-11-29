@@ -170,7 +170,7 @@ public class VNFPSimulation {
 
             double acceptNSCount = this.acceptedNS.size();
 
-//            out.write("接受的network service总数为：" + acceptNSCount + "\r\n");
+            out.write("接受的network service总数为：" + acceptNSCount + "\r\n");
 
             double sfcTotalLength = 0;
             double nsTotalHops = 0;
@@ -191,8 +191,8 @@ public class VNFPSimulation {
             double nsAverHops = nsTotalHops / acceptNSCount;
             double averHopsBetweenTwoVnf = nsAverHops / (sfcAverLength - 1);
 
-//            out.write("接受的network service中服务链的平均长度为：" + sfcAverLength + "\r\n" +
-//                      "接受的network service中的平均的跳数为：" + nsAverHops + "\r\n");
+            out.write("接受的network service中服务链的平均长度为：" + sfcAverLength + "\r\n" +
+                      "接受的network service中的平均的跳数为：" + nsAverHops + "\r\n");
             out.write("两个vnf之间的平均跳数：" + averHopsBetweenTwoVnf + "\r\n\r\n\r\n");
             out.close();
         } catch(Exception e1) {
