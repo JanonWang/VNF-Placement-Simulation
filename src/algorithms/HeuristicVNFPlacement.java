@@ -301,8 +301,7 @@ public class HeuristicVNFPlacement implements VNFPlacement{
         }
     }
 
-    // 返回0说明没有这个元素，返回1~5说明之前产生的五个VNF中包含了这种类型
-    // 1说明上一个新建的VNF就是这种类型的
+
     private int getCountInQueue(int vnfType) { // checked!
         //return vnfQueue.indexOf(vnfType) + 1; // index函数从头开始遍历
         int count = 0;
