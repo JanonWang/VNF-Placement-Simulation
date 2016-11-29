@@ -145,7 +145,7 @@ public class VNFPSimulation {
     }
 
     private void showSimulationResult2(double para1, double para2, double para3, double vnfRelationPara) {
-        String filename = "HeuristicSimulationResult-summarize.txt";
+        String filename = "AdvancedSimulationResult-summarize.txt";
         File file = new File(filename);
 
         if(para1 == 1 && para2 == 0 && para3 == 0 && vnfRelationPara == 0.3) {
@@ -228,7 +228,7 @@ public class VNFPSimulation {
         FatTreeTopo topo = new FatTreeTopo(fatTreeK);
         NetworkServiceManager networkServiceManager = new NetworkServiceManager(vnfSum, vnfRelationPara,
                 alpha, trafficRateMin);
-        VNFPlacement vnfPlacement = new HeuristicVNFPlacement(topo, para1, para2, para3);
+        VNFPlacement vnfPlacement = new AdvancedVNFPlacement(topo, para1, para2, para3);
         VNFPSimulation vnfpSimulation = new VNFPSimulation(topo, vnfPlacement);
         boolean ifContinue = true;
         while(ifContinue) {
@@ -285,13 +285,10 @@ public class VNFPSimulation {
     public static void main(String[] args) {
 
         double vnfRelationPara = (double)3 / 10;
-        double para1;
-        double para2;
-        double para3;
 
-        para1 = 1;
-        para2 = 0;
-        para3 = 0;
+        double para1 = 1;
+        double para2 = 0;
+        double para3 = 0;
         VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
 
         para3 = 0.5;
@@ -306,6 +303,5 @@ public class VNFPSimulation {
         para1 = 0;
         para3 = 1;
         VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
-
     }
 }

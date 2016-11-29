@@ -17,7 +17,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
     private Topology topo;
 
     private double[][] vnfCountMatrix;
-    private LinkedList<Integer> vnfQueue;
+    // private LinkedList<Integer> vnfQueue;
     private final int cutNumberK = 5; // 暂定为5，分的太细了也不行，造成多个vnf一个一组的情况
 
     private double para1;
@@ -34,7 +34,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
             this.vnfCountMatrix[0][i] = i % 10;
             this.vnfCountMatrix[i][0] = i % 10;
         }
-        this.vnfQueue = new LinkedList<>();
+        // this.vnfQueue = new LinkedList<>();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
         } else {
             topo.launchVM(server, vm);
             // 将已经启动过的VNF在队列中做记录
-            addQueue(vnfType);
+            //addQueue(vnfType);
             return vm;
         }
     }
@@ -98,7 +98,10 @@ public class AdvancedVNFPlacement implements VNFPlacement{
             for(int edgeSwitchId : edgeSwitchIds) {
                 EdgeSwitch edgeSwitch = (EdgeSwitch) topo.getSwitchByAddress(new Address(podId, 0, edgeSwitchId, 0));
                 Set<PhysicalServer> serverInEdge = new HashSet<>();
-                edgeSwitch.getDownLinks().forEach(link -> serverInEdge.add((PhysicalServer) link.getDownNode()));
+                Vector<Link> downLinks = edgeSwitch.getDownLinks();
+                for(int i = 1; i < downLinks.size(); i++) {
+                    serverInEdge.add((PhysicalServer) downLinks.get(i).getDownNode());
+                }
                 ArrayList<PhysicalServer> filteredServer = filterServers(serverInEdge, cpuNeeded, ramNeeded);
                 if(!filteredServer.isEmpty())
                     return weightServers(filteredServer, vnfGroup);
@@ -108,14 +111,14 @@ public class AdvancedVNFPlacement implements VNFPlacement{
         return null;
     }
 
-    // FIXME -- 当set为空的情况
+    // 当set为空的时候，说明该vnf是单独成一组的，与其他的vnf没有关系，则随机返回pod的rank顺序
     private int[] rankPod(Set<Integer> vnfGroup) {
         int k = ((FatTreeTopo)topo).getK();
         if(vnfGroup.isEmpty()) {
             int random = randomUniformInt(1, k);
             int[] rankResult = new int[k];
             for(int j = 0; j < k; j++) {
-                rankResult[j] = random % k;
+                rankResult[j] = random % k + 1;
                 random++;
             }
             return rankResult;
@@ -140,7 +143,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
             int random = randomUniformInt(1, k/2);
             int rankResult[] = new int[k/2];
             for(int j = 0; j < k/2; j++) {
-                rankResult[j] = random % k;
+                rankResult[j] = random % (k/2) + 1;
                 random++;
             }
             return rankResult;
@@ -196,12 +199,11 @@ public class AdvancedVNFPlacement implements VNFPlacement{
         int size = servers.size();
         double[][] decisionM = new double[size][3];
         // 计算决策矩阵
-        int ii = 0;
-        for(PhysicalServer s : servers) {
-            decisionM[ii][0] = s.getCpuCoreRemain();
-            decisionM[ii][1] = s.getRamRemain();
-            decisionM[ii][2] = calculateVnfScore(s, vnfGroup);
-            ii++;
+        for(int i = 0; i < size; i++) {
+            PhysicalServer s = servers.get(i);
+            decisionM[i][0] = s.getCpuCoreRemain();
+            decisionM[i][1] = s.getRamRemain();
+            decisionM[i][2] = calculateVnfScore(s, vnfGroup); // FIXME -- 根据vnfGroup来计算还是根据vnf来计算？
         }
         // 数据归一化
         decisionM = normalizeM(decisionM, size);
@@ -259,6 +261,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
     }
 
     private Set<Set<Integer>> getKcut(int k) {
+        // 深拷贝vnfCountMatrix矩阵
         // 矩阵转化成对称矩阵，有向图变成无向图
         double[][] vnfCountMatrix1 = new double[vnfCountMatrix.length - 1][vnfCountMatrix.length - 1];
         for (int i = 1; i < vnfCountMatrix.length; i++) {
@@ -327,7 +330,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
             }
         }
         // 将最小的边置0
-        System.out.println("miniRow: " + miniRow + "miniColumn: " + miniColumn);
+        // System.out.println("miniRow: " + miniRow + "miniColumn: " + miniColumn);
         matrix[miniRow][miniColumn] = 0;
         matrix[miniColumn][miniRow] = 0;
         matrix[miniColumn][miniColumn]--;
@@ -424,42 +427,42 @@ public class AdvancedVNFPlacement implements VNFPlacement{
     }
 
     private VirtualMachine generateVnf(int vnfType) {
-        int count = getCountInQueue(vnfType);
-        //return new VirtualMachine(1, 1024, vnfType);
-        switch(count) {
-            case 0:
-                // VirtualMachine(int cpuNeeded, int ramNeeded, int vnfType)
-                return new VirtualMachine(1, 1024, vnfType);
-            case 1:
-                return new VirtualMachine(2, 2048, vnfType);
-            case 2:
-                return new VirtualMachine(3, 4096, vnfType);
-            case 3:
-                return new VirtualMachine(4, 8192, vnfType);
-            default:
-                return new VirtualMachine(4, 8192, vnfType);
-        }
+//        int count = getCountInQueue(vnfType);
+        return new VirtualMachine(1, 1024, vnfType);
+//        switch(count) {
+//            case 0:
+//                // VirtualMachine(int cpuNeeded, int ramNeeded, int vnfType)
+//                return new VirtualMachine(1, 1024, vnfType);
+//            case 1:
+//                return new VirtualMachine(2, 2048, vnfType);
+//            case 2:
+//                return new VirtualMachine(3, 4096, vnfType);
+//            case 3:
+//                return new VirtualMachine(4, 8192, vnfType);
+//            default:
+//                return new VirtualMachine(4, 8192, vnfType);
+//        }
     }
 
-    private void addQueue(int vnfType) {
-        int queueLimit = 20;
-        if(vnfQueue.size() >= queueLimit) {
-            vnfQueue.removeLast();
-            vnfQueue.addFirst(vnfType);
-        } else {
-            vnfQueue.addFirst(vnfType);
-        }
-    }
+//    private void addQueue(int vnfType) {
+//        int queueLimit = 20;
+//        if(vnfQueue.size() >= queueLimit) {
+//            vnfQueue.removeLast();
+//            vnfQueue.addFirst(vnfType);
+//        } else {
+//            vnfQueue.addFirst(vnfType);
+//        }
+//    }
 
-    private int getCountInQueue(int vnfType) { // checked!
-        //return vnfQueue.indexOf(vnfType) + 1; // index函数从头开始遍历
-        int count = 0;
-        for(Integer vnf : vnfQueue) {
-            if(vnf == vnfType)
-                count++;
-        }
-        return count;
-    }
+//    private int getCountInQueue(int vnfType) { // checked!
+//        //return vnfQueue.indexOf(vnfType) + 1; // index函数从头开始遍历
+//        int count = 0;
+//        for(Integer vnf : vnfQueue) {
+//            if(vnf == vnfType)
+//                count++;
+//        }
+//        return count;
+//    }
 
     private int randomUniformInt(int lower, int high) {
         return lower + (int)(Math.random()*(high - lower +1));
