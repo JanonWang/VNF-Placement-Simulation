@@ -275,20 +275,20 @@ public class HeuristicVNFPlacement implements VNFPlacement{
 
     private VirtualMachine generateVnf(int vnfType) { // checked!
         int count = getCountInQueue(vnfType);
-        //return new VirtualMachine(1, 1024, vnfType);
-        switch(count) {
-            case 0:
-                // VirtualMachine(int cpuNeeded, int ramNeeded, int vnfType)
-                return new VirtualMachine(1, 1024, vnfType);
-            case 1:
-                return new VirtualMachine(2, 2048, vnfType);
-            case 2:
-                return new VirtualMachine(3, 4096, vnfType);
-            case 3:
-                return new VirtualMachine(4, 8192, vnfType);
-            default:
-                return new VirtualMachine(4, 8192, vnfType);
-        }
+        return new VirtualMachine(1, 1024, vnfType);
+//        switch(count) {
+//            case 0:
+//                // VirtualMachine(int cpuNeeded, int ramNeeded, int vnfType)
+//                return new VirtualMachine(1, 1024, vnfType);
+//            case 1:
+//                return new VirtualMachine(2, 2048, vnfType);
+//            case 2:
+//                return new VirtualMachine(3, 4096, vnfType);
+//            case 3:
+//                return new VirtualMachine(4, 8192, vnfType);
+//            default:
+//                return new VirtualMachine(4, 8192, vnfType);
+//        }
     }
 
     private void addQueue(int vnfType) { // checked!
