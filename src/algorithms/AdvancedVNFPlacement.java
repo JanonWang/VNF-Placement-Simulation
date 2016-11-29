@@ -104,7 +104,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
                 }
                 ArrayList<PhysicalServer> filteredServer = filterServers(serverInEdge, cpuNeeded, ramNeeded);
                 if(!filteredServer.isEmpty())
-                    return weightServers(filteredServer, vnfGroup);
+                    return weightServers(filteredServer, thisVnfType);
             }
         }
         // 遍历了全部的pod，都没有找到可行的server，则返回空
@@ -194,7 +194,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
     }
 
     //将edgeSwitch上过滤过得server排序，直接返回得分最高的server
-    private PhysicalServer weightServers(ArrayList<PhysicalServer> servers, Set<Integer> vnfGroup) {
+    private PhysicalServer weightServers(ArrayList<PhysicalServer> servers, int thisVnfType) {
         double[] multiplier = new double[]{para1, para2, para3};
         int size = servers.size();
         double[][] decisionM = new double[size][3];
@@ -203,7 +203,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
             PhysicalServer s = servers.get(i);
             decisionM[i][0] = s.getCpuCoreRemain();
             decisionM[i][1] = s.getRamRemain();
-            decisionM[i][2] = calculateVnfScore(s, vnfGroup); // FIXME -- 根据vnfGroup来计算还是根据vnf来计算？
+            decisionM[i][2] = calculateVnfScore(s, thisVnfType); // FIXME -- 根据vnfGroup来计算还是根据vnf来计算？
         }
         // 数据归一化
         decisionM = normalizeM(decisionM, size);
@@ -225,13 +225,25 @@ public class AdvancedVNFPlacement implements VNFPlacement{
     }
 
     // 计算server关于vnf的得分，server上关于该组中的vnf组中vnf的数量总和
-    private double calculateVnfScore(PhysicalServer server, Set<Integer> vnfGroup) {
-        int[] vnfCount = server.getVnfCounts();
-        double vnfSum = 0;
-        for(Integer vnf : vnfGroup) {
-            vnfSum += vnfCount[vnf];
+    private double calculateVnfScore(PhysicalServer server, int vnfType) {
+        double[] lastVnfCount = new double[VNFPSimulation.vnfSum + 1];
+        double[] nextVnfCount = new double[VNFPSimulation.vnfSum + 1];
+        for(int i = 1; i <= VNFPSimulation.vnfSum; i++){
+            lastVnfCount[i] = vnfCountMatrix[i][vnfType];
+            nextVnfCount[i] = vnfCountMatrix[vnfType][i];
         }
-        return vnfSum;
+        double max1 = lastVnfCount[0];
+        double max2 = nextVnfCount[0];
+        // maxIndex 代表的是与vnfType 最相关的vnf的类型
+        int maxIndex1 = 0;
+        int maxIndex2 = 0;
+        for(int i = 1; i <= VNFPSimulation.vnfSum; i++) {
+            if(lastVnfCount[i] > max1)
+                maxIndex1 = i;
+            if(nextVnfCount[i] > max2)
+                maxIndex2 = i;
+        }
+        return server.getVnfCount(maxIndex1) + server.getVnfCount(maxIndex2);
     }
 
     private double[][] normalizeM(double[][] m, int size){
