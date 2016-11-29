@@ -14,7 +14,7 @@ public class HeuristicVNFPlacement implements VNFPlacement{
 
     private Topology topo;
     private int[][] vnfCountMatrix;
-    private LinkedList<Integer> vnfQueue;
+    // private LinkedList<Integer> vnfQueue;
     private final int topN =1;
 
     private double para1;
@@ -32,7 +32,7 @@ public class HeuristicVNFPlacement implements VNFPlacement{
             this.vnfCountMatrix[0][i] = i;
             this.vnfCountMatrix[i][0] = i;
         }
-        this.vnfQueue = new LinkedList<>();
+        // this.vnfQueue = new LinkedList<>();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class HeuristicVNFPlacement implements VNFPlacement{
             this.topo.launchVM(server, vm);
             // System.out.println(vnfType + " is launched at " + server.getAddress().toString());
             // 将已经启动过的VNF在队列中做记录
-            addQueue(vnfType);
+            // addQueue(vnfType);
             return vm;
         }
     }
@@ -121,7 +121,7 @@ public class HeuristicVNFPlacement implements VNFPlacement{
         if(servers.size() <= this.topN) {
             return servers;
         }
-        double[] multiplier = new double[]{para1, para2, para3};  //FIXME  ---  设置server评分时元素的权重
+        double[] multiplier = new double[]{para1, para2, para3};
         int size = servers.size();
         double[][] decisionM = new double[size][3];
         // 计算决策矩阵
@@ -274,7 +274,7 @@ public class HeuristicVNFPlacement implements VNFPlacement{
     }
 
     private VirtualMachine generateVnf(int vnfType) { // checked!
-        int count = getCountInQueue(vnfType);
+        // int count = getCountInQueue(vnfType);
         return new VirtualMachine(1, 1024, vnfType);
 //        switch(count) {
 //            case 0:
@@ -291,26 +291,26 @@ public class HeuristicVNFPlacement implements VNFPlacement{
 //        }
     }
 
-    private void addQueue(int vnfType) { // checked!
-        int queueLimit = 20;
-        if(this.vnfQueue.size() >= queueLimit) {
-            vnfQueue.removeLast();
-            vnfQueue.addFirst(vnfType);
-        } else {
-            vnfQueue.addFirst(vnfType);
-        }
-    }
+//    private void addQueue(int vnfType) { // checked!
+//        int queueLimit = 20;
+//        if(this.vnfQueue.size() >= queueLimit) {
+//            vnfQueue.removeLast();
+//            vnfQueue.addFirst(vnfType);
+//        } else {
+//            vnfQueue.addFirst(vnfType);
+//        }
+//    }
 
 
-    private int getCountInQueue(int vnfType) { // checked!
-        //return vnfQueue.indexOf(vnfType) + 1; // index函数从头开始遍历
-        int count = 0;
-        for(Integer vnf : vnfQueue) {
-            if(vnf == vnfType)
-                count++;
-        }
-        return count;
-    }
+//    private int getCountInQueue(int vnfType) { // checked!
+//        //return vnfQueue.indexOf(vnfType) + 1; // index函数从头开始遍历
+//        int count = 0;
+//        for(Integer vnf : vnfQueue) {
+//            if(vnf == vnfType)
+//                count++;
+//        }
+//        return count;
+//    }
 
     /**
      * generate a int according to the uniform distribution, including the lower and high number.
