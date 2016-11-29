@@ -1,5 +1,6 @@
 package main;
 
+import algorithms.AdvancedVNFPlacement;
 import algorithms.HeuristicVNFPlacement;
 import algorithms.VNFPlacement;
 import manager.NetworkServiceManager;
@@ -27,7 +28,7 @@ public class VNFPSimulation {
     private final static double alpha = 2.1;  // positive number!
     private final static double trafficRateMin = 10; // Mbps
 
-    private final static int fatTreeK = 4;
+    private final static int fatTreeK = 10;
 
     private Set<NetworkService> acceptedNS;
     private VirtualMachine[] availableVNF; // 用于记录对于每种vnf，目前空闲的VM信息，某一时刻，对于某种VNF，只有一个可行的VNF, VNF的类型即为其数组序号
@@ -144,7 +145,7 @@ public class VNFPSimulation {
     }
 
     private void showSimulationResult2(double para1, double para2, double para3, double vnfRelationPara) {
-        String filename = "SimulationResult-summarize.txt";
+        String filename = "AdvancedSimulationResult-summarize.txt";
         File file = new File(filename);
 
         if(para1 == 1 && para2 == 0 && para3 == 0 && vnfRelationPara == 0.3) {
@@ -169,7 +170,7 @@ public class VNFPSimulation {
 
             double acceptNSCount = this.acceptedNS.size();
 
-//            out.write("接受的network service总数为：" + acceptNSCount + "\r\n");
+            out.write("接受的network service总数为：" + acceptNSCount + "\r\n");
 
             double sfcTotalLength = 0;
             double nsTotalHops = 0;
@@ -190,8 +191,8 @@ public class VNFPSimulation {
             double nsAverHops = nsTotalHops / acceptNSCount;
             double averHopsBetweenTwoVnf = nsAverHops / (sfcAverLength - 1);
 
-//            out.write("接受的network service中服务链的平均长度为：" + sfcAverLength + "\r\n" +
-//                      "接受的network service中的平均的跳数为：" + nsAverHops + "\r\n");
+            out.write("接受的network service中服务链的平均长度为：" + sfcAverLength + "\r\n" +
+                      "接受的network service中的平均的跳数为：" + nsAverHops + "\r\n");
             out.write("两个vnf之间的平均跳数：" + averHopsBetweenTwoVnf + "\r\n\r\n\r\n");
             out.close();
         } catch(Exception e1) {
@@ -224,17 +225,16 @@ public class VNFPSimulation {
         FatTreeTopo topo = new FatTreeTopo(fatTreeK);
         NetworkServiceManager networkServiceManager = new NetworkServiceManager(vnfSum, vnfRelationPara,
                 alpha, trafficRateMin);
-        // VNFPlacement vnfPlacement = new AdvancedVNFPlacement(topo);
-        VNFPlacement vnfPlacement = new HeuristicVNFPlacement(topo, para1, para2, para3);
+        VNFPlacement vnfPlacement = new AdvancedVNFPlacement(topo, para1, para2, para3);
         VNFPSimulation vnfpSimulation = new VNFPSimulation(topo, vnfPlacement);
         boolean ifContinue = true;
         while(ifContinue) {
             NetworkService ns = networkServiceManager.nextNS();
-            System.out.print("产生的服务链为：");
-            for(VirtualNetworkFunction v : ns.sfcList) {
-                System.out.print(v.vnfType + "-->");
-            }
-            System.out.print("end\n");
+//            System.out.print("产生的服务链为：");
+//            for(VirtualNetworkFunction v : ns.sfcList) {
+//                System.out.print(v.vnfType + "-->");
+//            }
+//            System.out.print("end\n");
             vnfPlacement.countVnf(ns);
             // vnfPlacement.showVnfCountMatrix();
             for(VirtualNetworkFunction v : ns.sfcList) {
@@ -274,25 +274,31 @@ public class VNFPSimulation {
                 vnfpSimulation.acceptedNS.add(ns);
         }
         System.out.print("-----打印数据-----\n\n\n");
-        //vnfpSimulation.showSimulationResult2(para1, para2, para3, vnfRelationPara);\
-        vnfpSimulation.showSimulationResult1(para1, para2, para3);
+        vnfpSimulation.showSimulationResult2(para1, para2, para3, vnfRelationPara);
+        // vnfpSimulation.showSimulationResult1(para1, para2, para3);
     }
 
 
     public static void main(String[] args) {
-//        for(int j = 0; j <= 10; j++) {
-            double vnfRelationPara = (double)3 / 10;
-            double para1 = 1;
-            double para2 = 0;
-            double para3;
-//            for(int i = 0; i <= 20; i++) {
-//            para3 = (double) i / 10;
-//            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
-//        }
-            para1 = 1;
-            para2 = 0;
-            para3 = 1;
-            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
-//        }
+
+        double vnfRelationPara = (double)3 / 10;
+
+        double para1 = 1;
+        double para2 = 0;
+        double para3 = 0;
+        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+
+        para3 = 0.5;
+        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+
+        para3 = 1;
+        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+
+        para3 = 1.5;
+        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+
+        para1 = 0;
+        para3 = 1;
+        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
     }
 }
