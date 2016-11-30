@@ -18,6 +18,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
 
     private double[][] vnfCountMatrix;
     // private LinkedList<Integer> vnfQueue;
+    // FIXME -- cutK也应该变化
     private final int cutNumberK = 5; // 暂定为5，分的太细了也不行，造成多个vnf一个一组的情况
 
     private double para1;
@@ -203,7 +204,7 @@ public class AdvancedVNFPlacement implements VNFPlacement{
             PhysicalServer s = servers.get(i);
             decisionM[i][0] = s.getCpuCoreRemain();
             decisionM[i][1] = s.getRamRemain();
-            decisionM[i][2] = calculateVnfScore(s, thisVnfType); // FIXME -- 根据vnfGroup来计算还是根据vnf来计算？
+            decisionM[i][2] = calculateVnfScore(s, thisVnfType);
         }
         // 数据归一化
         decisionM = normalizeM(decisionM, size);

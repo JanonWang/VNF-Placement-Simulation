@@ -10,10 +10,7 @@ import topology.fatTree.FatTreeTopo;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -145,10 +142,10 @@ public class VNFPSimulation {
     }
 
     private void showSimulationResult2(double para1, double para2, double para3, double vnfRelationPara) {
-        String filename = "AdvancedSimulationResult-summarize.txt";
+        String filename = "AdvancedSimulationResult-summarize-vnfRelationPara-" + vnfRelationPara + ".txt";
         File file = new File(filename);
 
-        if(para1 == 1 && para2 == 0 && para3 == 0 && vnfRelationPara == 0.3) {
+        if(para1 == 1 && para2 == 0 && para3 == 0) {
             try{
                 if(file.exists()) {
                     if(!file.delete())
@@ -222,13 +219,23 @@ public class VNFPSimulation {
 
 
 
-    private static void runOnce(double para1, double para2, double para3, double vnfRelationPara) {
+    private static void runOnce(double para1, double para2, double para3, double vnfRelationPara, int choice) {
         System.out.print("-----仿真程序开始-----\n");
         System.out.println("权值系数为：" + para1 + "   " + para2 + "   " + para3 + "   " + "vnfRelation系数为：" + vnfRelationPara);
         FatTreeTopo topo = new FatTreeTopo(fatTreeK);
         NetworkServiceManager networkServiceManager = new NetworkServiceManager(vnfSum, vnfRelationPara,
                 alpha, trafficRateMin);
-        VNFPlacement vnfPlacement = new AdvancedVNFPlacement(topo, para1, para2, para3);
+        VNFPlacement vnfPlacement;
+        if(choice == 1) {
+            vnfPlacement = new HeuristicVNFPlacement(topo, para1, para2, para3);
+        } else if(choice == 2) {
+            vnfPlacement = new AdvancedVNFPlacement(topo, para1, para2, para3);
+        } else {
+            System.err.println("input error, invalid choice");
+            return;
+        }
+        // VNFPlacement vnfPlacement = new AdvancedVNFPlacement(topo, para1, para2, para3);
+        // VNFPlacement vnfPlacement = new HeuristicVNFPlacement(topo, para1, para2, para3);
         VNFPSimulation vnfpSimulation = new VNFPSimulation(topo, vnfPlacement);
         boolean ifContinue = true;
         while(ifContinue) {
@@ -284,24 +291,42 @@ public class VNFPSimulation {
 
     public static void main(String[] args) {
 
-        double vnfRelationPara = (double)3 / 10;
+        System.out.println("输入1为heuristic，输入2为advanced");
+        int input = 0;
+        Scanner s = new Scanner(System.in);
+        while(s.hasNext()) {
+            if(s.nextInt() == 1) {
+                input = 1;
+                break;
+            } else if(s.nextInt() == 2) {
+                input = 2;
+            } else {
+                System.out.println("重新输入。。。");
+                System.out.println("输入1为heuristic，输入2为advanced");
+            }
+        }
 
-        double para1 = 1;
-        double para2 = 0;
-        double para3 = 0;
-        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+        for(int i = 1; i < 10; i++) {
+            double vnfRelationPara = (double)i / 10;
 
-        para3 = 0.5;
-        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+            double para1 = 1;
+            double para2 = 0;
+            double para3 = 0;
+            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara,input);
 
-        para3 = 1;
-        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+            para3 = 0.5;
+            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara,input);
 
-        para3 = 1.5;
-        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+            para3 = 1;
+            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara,input);
 
-        para1 = 0;
-        para3 = 1;
-        VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara);
+            para3 = 1.5;
+            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara,input);
+
+            para1 = 0;
+            para3 = 1;
+            VNFPSimulation.runOnce(para1, para2, para3, vnfRelationPara,input);
+
+        }
     }
 }
