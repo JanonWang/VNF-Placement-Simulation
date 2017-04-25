@@ -6,6 +6,7 @@ import model.*;
  * @author Janon Wang
  */
 public interface Topology {
+    PhysicalServer[][] getServerByPod(short podId);
     PhysicalServer[] getServerByEdge(short podId, short edgei);
     PhysicalServer getServerById(int podId, int edgei, int serveri);
     PhysicalServer getServerByAddress(Address addr);

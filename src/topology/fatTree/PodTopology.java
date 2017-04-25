@@ -95,6 +95,10 @@ class PodTopology {
         return aggres[i];
     }
 
+    PhysicalServer[][] getServerInPod() {
+        return this.physicalServers;
+    }
+
     PhysicalServer[] getServerByEdge(short edgei) {
         return  this.physicalServers[edgei];
     }

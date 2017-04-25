@@ -13,17 +13,15 @@ public class PhysicalServer extends Node {
 
     private Link edge;
     private int[] vnfCount;
-    private int VMCount;
     private Set<VirtualMachine> virtualMachineSet; // the virtual machine launched at server will be record
 
-    private final int cpuCoreCapacity = 50; // every server has 50 cpu cores
-    private final int ramCapacity = 131072; // every server has 131072 MB ram
-
-    private int cpuCoreUsed;
-    private int ramUsed;
+    private final int cpuCoreCapacity = 5; // FIXME -- 把每个server的cpu改成了20
+    private final int ramCapacity = 6*1024; // FIXME -- 每个server的内存改成了32GB
 
     private int cpuCoreRemain;
     private int ramRemain;
+
+    private int trafficIO;
 
 
     public PhysicalServer(Address address) {
@@ -33,20 +31,10 @@ public class PhysicalServer extends Node {
         for (int i = 0; i < VNFPSimulation.vnfSum + 1; i++) {
             vnfCount[i] = 0;
         }
-        this.VMCount = 0;
-        virtualMachineSet = new HashSet<>();
-        this.cpuCoreUsed = 0;
-        this.ramUsed = 0;
+        this.trafficIO = 0;
+        this.virtualMachineSet = new HashSet<>();
         this.cpuCoreRemain = this.cpuCoreCapacity;
         this.ramRemain = this.ramCapacity;
-    }
-
-    public int getCpuCoreRemain() {
-        return this.cpuCoreRemain;
-    }
-
-    public int getRamRemain() {
-        return this.ramRemain;
     }
 
     public void setEdgeLink(Link l) {
@@ -73,12 +61,10 @@ public class PhysicalServer extends Node {
         return ram <= ramRemain;
     }
 
-    // FIXME --- 还需要对pod和edgeSwitch中的vnf数量也增加
     public boolean launchVM(VirtualMachine vm) {
         if(vm.cpu <= cpuCoreRemain && vm.ram <= ramRemain) {
             consumeCpu(vm.cpu);
             consumeRam(vm.ram);
-            VMCount ++;
             virtualMachineSet.add(vm);
             vnfCount[vm.vnfType]++;
             return true;
@@ -86,19 +72,27 @@ public class PhysicalServer extends Node {
             return false;
         }
     }
-
     private void consumeCpu(int cpuConsumed) {
-            cpuCoreUsed += cpuConsumed;
-            cpuCoreRemain -= cpuConsumed;
+        cpuCoreRemain -= cpuConsumed;
     }
-
     private void consumeRam(int ramConsume) {
-            ramUsed += ramConsume;
-            ramRemain -= ramConsume;
+        ramRemain -= ramConsume;
     }
 
-    public void addVnf(int vnfType) {
-        vnfCount[vnfType] ++;
+    public void addTrafficIO(int trafficRate) {
+        this.trafficIO += trafficRate;
+    }
+
+    public int getCpuCoreRemain() {
+        return this.cpuCoreRemain;
+    }
+
+    public int getRamRemain() {
+        return this.ramRemain;
+    }
+
+    public int getTrafficIO() {
+        return this.trafficIO;
     }
 
     public int[] getVnfCounts() {
@@ -109,19 +103,11 @@ public class PhysicalServer extends Node {
         return vnfCount[vnfType];
     }
 
-    public void addVM(VirtualMachine v) {
-        virtualMachineSet.add(v);
-    }
-
-    public int getVMCount() {
-        return VMCount;
-    }
-
-    public Set<VirtualMachine> getVMSet() {
-        return virtualMachineSet;
-    }
-
     public String getName() {
         return "Server" + addr.getServer();
+    }
+
+    public Set<VirtualMachine> getVmSet() {
+        return this.virtualMachineSet;
     }
 }

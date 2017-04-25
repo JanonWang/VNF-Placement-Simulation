@@ -69,7 +69,12 @@ public class FatTreeTopo implements Topology{
         pod.addVnf(vm.vnfType);
         pod.getEdgeSwitch(edgeId).addVnf(vm.vnfType);
         server.launchVM(vm);
-        vm.position = address;
+        vm.position = server;
+    }
+
+    @Override
+    public PhysicalServer[][] getServerByPod(short podId) {
+        return this.podTopologies[podId].getServerInPod();
     }
 
     @Override

@@ -8,9 +8,11 @@ public class VirtualNetworkFunction {
     public int vnfType;
     public int mipsNeeded;
     public Address position;
+    public int trafficRate;
 
     public VirtualNetworkFunction(int vnfType, int trafficRate) {
         this.vnfType = vnfType;
+        this.trafficRate = trafficRate;
         this.mipsNeeded = calculateMips(trafficRate);
     }
 

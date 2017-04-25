@@ -1,7 +1,9 @@
 package algorithms;
 
+import model.Address;
 import model.NetworkService;
 import model.VirtualMachine;
+import model.VirtualNetworkFunction;
 
 import java.util.Set;
 
@@ -10,8 +12,11 @@ import java.util.Set;
  */
 public interface VNFPlacement {
     void countVnf(NetworkService ns);
-    //boolean placeVNFs(Set<Integer> vnfTypes);
-    VirtualMachine placeNewVNF(int vnfType);
+    VirtualMachine placeVNFInTopo(VirtualNetworkFunction virtualNetworkFunction);
+    VirtualMachine placeVNFInServer(VirtualNetworkFunction virtualNetworkFunction, Address serverAddr);
+    VirtualMachine placeVNFInRack(VirtualNetworkFunction virtualNetworkFunction, Address serverAddr);
     void showVnfCountMatrix();
     int[][] getVnfCountMatrix();
+    boolean isMostRelated(int lastVNF, int thisVNF);
+    boolean inSameGroup(int lastVNF, int thisVNF);
 }
